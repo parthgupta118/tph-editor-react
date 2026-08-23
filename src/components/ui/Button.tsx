@@ -29,7 +29,7 @@ export default function Button({
         'text-sm transition-colors duration-200 ease-[--ease-smooth]',
         'focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:outline-none',
         disabled
-          ? 'cursor-not-allowed text-muted/45 line-through decoration-1'
+          ? 'cursor-not-allowed text-muted/45 decoration-1'
           : active
             ? 'bg-accent-soft text-accent'
             : 'text-ink hover:bg-accent-soft active:bg-line/60',
