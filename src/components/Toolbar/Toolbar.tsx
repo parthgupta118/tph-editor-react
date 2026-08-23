@@ -84,7 +84,7 @@ export function Toolbar({
       {blockTypes.map((type) => (
         <Button
           key={type}
-          label={type === 'paragraph' ? 'Paragraph' : `Heading ${type[1]}`}
+          label={type === 'paragraph' ? 'Normal' : `Heading ${type[1]}`}
           active={blockType === type}
           disabled={noSelection}
           onClick={() =>
@@ -99,7 +99,7 @@ export function Toolbar({
             )
           }
         >
-          {type === 'paragraph' ? 'P' : type.toUpperCase()}
+          {type === 'paragraph' ? 'Normal' : type.toUpperCase()}
         </Button>
       ))}
 
