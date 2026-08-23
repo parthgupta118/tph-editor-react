@@ -1,0 +1,35 @@
+# Cursor rules
+
+Full context is in CLAUDE.md. Read it before making changes; these are the rules that
+matter most often.
+
+## Architecture
+
+- `src/core/**` is pure. No React, no `window`, no `document`. Enforced by
+  `no-restricted-imports` in eslint.config.js.
+- `src/dom/selection.ts` is the only module allowed to touch the DOM selection.
+- Every document change goes through an operation in `core/model/operations/`.
+  Nothing else builds or mutates a `Doc`.
+- Operations return new objects and end with `normalizeBlock` on the blocks they
+  touched. Adjacent runs with equal marks must always be merged and empty runs
+  dropped, so a document has exactly one representation.
+- Positions are `{ blockId, offset }` counting characters. Never a child index;
+  normalization invalidates it.
+- Marks are optional keys only: `{ bold: true }` or `{}`. Never `false`, never
+  `undefined`.
+
+## Style
+
+- TypeScript strict, plus noUncheckedIndexedAccess and exactOptionalPropertyTypes.
+  No `any`.
+- Discriminated unions over objects with optional fields. `assertNever` in the default
+  case of every switch over one.
+- Tests are logic tests, run in node. No DOM snapshots. Fixtures come from
+  `core/test-builders.ts`.
+- Comments explain why, not what. Delete anything that restates the code.
+
+## Before suggesting a change
+
+- Check it against the invariants above. Most wrong answers here break one rather than
+  being logically wrong.
+- Include a test for the boundary case, not only the happy path.
