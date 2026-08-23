@@ -76,6 +76,7 @@ export function marksInRange(doc: Doc, selection: Selection): Marks {
   return {
     ...(covered.every((c) => c.marks.bold) && { bold: true as const }),
     ...(covered.every((c) => c.marks.italic) && { italic: true as const }),
+    ...(covered.every((c) => c.marks.underline) && { underline: true as const }),
     ...(href !== undefined && covered.every((c) => c.marks.link === href) && { link: href }),
   };
 }

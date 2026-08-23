@@ -4,9 +4,14 @@ import { useEditor } from './hooks/useEditor';
 import { Editor } from './components/Editor';
 import { Toolbar } from './components/Toolbar';
 import { Inspector } from './components/Inspector';
+import { LinkEditor } from './components/Toolbar/LinkEditor';
 import './styles/app.css';
 
-const text = (value: string, marks = {}) => ({ kind: 'text' as const, text: value, marks });
+const text = (value: string, marks = {}) => ({
+  kind: 'text' as const,
+  text: value,
+  marks,
+});
 
 const initialDoc: Doc = {
   blocks: [
@@ -66,11 +71,12 @@ export default function App() {
       </header>
 
       <div className="grid flex-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <section className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
+        <section className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm transition-shadow duration-200 ease-[--ease-smooth] focus-within:ring-2 focus-within:ring-accent/25">
           <Toolbar
             activeMarks={editor.activeMarks}
             selection={editor.selection}
             blockType={blockType}
+            align={currentBlock?.align ?? 'left'}
             canUndo={editor.canUndo}
             canRedo={editor.canRedo}
             run={editor.run}
@@ -89,6 +95,19 @@ export default function App() {
             redo={editor.redo}
           />
         </section>
+
+        {linkOpen && (
+          <LinkEditor
+            doc={editor.doc}
+            selection={editor.selection}
+            href={editor.activeMarks.link ?? ''}
+            onApply={(href) => {
+              editor.run({ type: 'setLink', href: href === '' ? null : href });
+              setLinkOpen(false);
+            }}
+            onClose={() => setLinkOpen(false)}
+          />
+        )}
 
         <Inspector
           doc={editor.doc}

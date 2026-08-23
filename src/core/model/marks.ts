@@ -2,7 +2,12 @@ import type { Block, Marks, ToggleableMark } from './types';
 import { resolve } from './text';
 
 export function marksEqual(a: Marks, b: Marks): boolean {
-  return a.bold === b.bold && a.italic === b.italic && a.link === b.link;
+  return (
+    a.bold === b.bold &&
+    a.italic === b.italic &&
+    a.underline === b.underline &&
+    a.link === b.link
+  );
 }
 
 export function withMark(marks: Marks, mark: ToggleableMark): Marks {

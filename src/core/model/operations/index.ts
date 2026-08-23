@@ -7,12 +7,12 @@ import {
   insertText,
   mergeWithPrevious,
 } from './editText';
-import { setBlockType, splitBlock } from './editBlocks';
+import { setAlign, setBlockType, splitBlock } from './editBlocks';
 import { setLink, toggleMark, togglePendingMark } from './editMarks';
 
 export type { OperationResult } from './editText';
 export { insertText, deleteRange, deleteBackward, deleteForward, mergeWithPrevious };
-export { splitBlock, setBlockType };
+export { splitBlock, setBlockType, setAlign };
 export { setLink, toggleMark, togglePendingMark };
 
 // Single entry point. Everything the UI does goes through here.
@@ -25,10 +25,10 @@ export function apply(state: EditorState, operation: Operations): EditorState {
       return { ...insertText(doc, selection, operation.text, pendingMarks), pendingMarks: null };
 
     case 'deleteBackward':
-      return { ...deleteBackward(doc, selection), pendingMarks: null };
+      return { ...deleteBackward(doc, selection, operation.unit), pendingMarks: null };
 
     case 'deleteForward':
-      return { ...deleteForward(doc, selection), pendingMarks: null };
+      return { ...deleteForward(doc, selection, operation.unit), pendingMarks: null };
 
     case 'splitBlock':
       return { ...splitBlock(doc, selection), pendingMarks: null };
@@ -40,6 +40,9 @@ export function apply(state: EditorState, operation: Operations): EditorState {
 
     case 'setLink':
       return { ...setLink(doc, selection, operation.href), pendingMarks: null };
+
+    case 'setAlign':
+      return { ...setAlign(doc, selection, operation.align), pendingMarks: null };
 
     case 'setBlockType':
       return { ...setBlockType(doc, selection, operation), pendingMarks: null };

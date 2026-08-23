@@ -72,12 +72,6 @@
     caret-color: var(--color-accent);
   }
 
-  /* Removing the outline without replacing it leaves keyboard users with no way to
-     tell the editor has focus. */
-  .editor:focus-visible {
-    box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--color-accent) 35%, transparent);
-  }
-
   /* Spacing follows document editors: paragraphs sit close together, headings get
      room above them to separate sections. */
   .editor > * + * {

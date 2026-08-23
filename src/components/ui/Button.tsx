@@ -6,7 +6,13 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function Button({ label, active = false, disabled = false, onClick, children }: Props) {
+export function Button({
+  label,
+  active = false,
+  disabled = false,
+  onClick,
+  children,
+}: Props) {
   return (
     <button
       type="button"
@@ -19,14 +25,14 @@ export function Button({ label, active = false, disabled = false, onClick, child
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       className={[
-        'inline-flex h-8 min-w-8 items-center justify-center rounded-[--radius-control] px-2',
-        'text-sm transition-colors duration-[140ms] ease-[--ease-out]',
+        'inline-flex h-8 min-w-8 cursor-pointer items-center justify-center rounded-sm px-2',
+        'text-sm transition-colors duration-200 ease-[--ease-smooth]',
         'focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:outline-none',
         disabled
           ? 'cursor-not-allowed text-muted/45 line-through decoration-1'
           : active
             ? 'bg-accent-soft text-accent'
-            : 'text-ink hover:bg-canvas active:bg-line/60',
+            : 'text-ink hover:bg-accent-soft active:bg-line/60',
       ].join(' ')}
     >
       {children}

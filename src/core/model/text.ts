@@ -54,3 +54,20 @@ export function sliceChildren(
   const [middle, after] = splitChildren({ ...block, children: rest }, to - from);
   return [before, middle, after];
 }
+
+const isSpace = (char: string | undefined) => char !== undefined && /\s/.test(char);
+
+// Skip any run of spaces, then the word itself — same as every native editor.
+export function wordStartBefore(text: string, offset: number): number {
+  let i = offset;
+  while (i > 0 && isSpace(text[i - 1])) i -= 1;
+  while (i > 0 && !isSpace(text[i - 1])) i -= 1;
+  return i;
+}
+
+export function wordEndAfter(text: string, offset: number): number {
+  let i = offset;
+  while (i < text.length && isSpace(text[i])) i += 1;
+  while (i < text.length && !isSpace(text[i])) i += 1;
+  return i;
+}

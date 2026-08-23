@@ -1,16 +1,19 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { Doc, Operations, Selection } from '../../core/model/types';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import type { Doc, Operations, Selection, ToggleableMark } from '../../core/model/types';
 import { linkRangeAt } from '../../core/model/queries';
 import {
   domMatchesSelection,
   readFromDom,
-  toDomRange,
   writeToDom,
 } from '../../dom/selection';
 import { BlockView } from './BlockView';
 import { insertPlainText } from './paste';
-import { LinkPopover } from '../Toolbar/LinkPopover';
-import { Overlay } from '../Toolbar/Overlay';
+
+const SHORTCUT_MARKS: Record<string, ToggleableMark | undefined> = {
+  b: 'bold',
+  i: 'italic',
+  u: 'underline',
+};
 
 type Props = {
   doc: Doc;
@@ -18,10 +21,6 @@ type Props = {
   run: (operation: Operations) => void;
   setSelection: (selection: Selection | null) => void;
   onLinkClick: (selection: Selection) => void;
-  linkOpen: boolean;
-  linkHref: string;
-  onLinkApply: (href: string) => void;
-  onLinkClose: () => void;
   undo: () => void;
   redo: () => void;
 };
@@ -32,10 +31,6 @@ export function Editor({
   run,
   setSelection,
   onLinkClick,
-  linkOpen,
-  linkHref,
-  onLinkApply,
-  onLinkClose,
   undo,
   redo,
 }: Props) {
@@ -56,14 +51,30 @@ export function Editor({
           return;
 
         case 'deleteContentBackward':
-        case 'deleteWordBackward':
         case 'deleteByCut':
           run({ type: 'deleteBackward' });
           return;
 
+        case 'deleteWordBackward':
+          run({ type: 'deleteBackward', unit: 'word' });
+          return;
+
+        case 'deleteSoftLineBackward':
+        case 'deleteHardLineBackward':
+          run({ type: 'deleteBackward', unit: 'line' });
+          return;
+
         case 'deleteContentForward':
-        case 'deleteWordForward':
           run({ type: 'deleteForward' });
+          return;
+
+        case 'deleteWordForward':
+          run({ type: 'deleteForward', unit: 'word' });
+          return;
+
+        case 'deleteSoftLineForward':
+        case 'deleteHardLineForward':
+          run({ type: 'deleteForward', unit: 'line' });
           return;
 
         case 'historyUndo':
@@ -104,15 +115,29 @@ export function Editor({
     if (!root) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return;
-      event.preventDefault();
-      if (event.shiftKey) redo();
-      else undo();
+      if (!(event.metaKey || event.ctrlKey)) return;
+
+      const key = event.key.toLowerCase();
+      const mark = SHORTCUT_MARKS[key];
+
+      if (mark) {
+        event.preventDefault();
+        run({ type: 'toggleMark', mark });
+        return;
+      }
+
+      // Browsers don't reliably surface Cmd+Z as a historyUndo input once every
+      // other input is prevented, so it's handled here instead.
+      if (key === 'z') {
+        event.preventDefault();
+        if (event.shiftKey) redo();
+        else undo();
+      }
     };
 
     root.addEventListener('keydown', onKeyDown);
     return () => root.removeEventListener('keydown', onKeyDown);
-  }, [undo, redo]);
+  }, [run, undo, redo]);
 
   // The browser owns where the caret is until something edits, so we track it.
   useEffect(() => {
@@ -152,15 +177,6 @@ export function Editor({
     [doc, setSelection, onLinkClick],
   );
 
-  // The browser stops painting the selection once focus moves to the link popover,
-  // we have to so paint it ourselves while that's open.
-  const [highlight, setHighlight] = useState<DOMRect[]>([]);
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    const range = linkOpen && root && selection ? toDomRange(root, selection) : null;
-    setHighlight(range ? Array.from(range.getClientRects()) : []);
-  }, [linkOpen, selection, doc]);
-
   // Re-rendering replaces text nodes, which destroys the caret. Put it back before
   // the browser paints, or it visibly jumps for a frame on every keystroke.
   useLayoutEffect(() => {
@@ -175,26 +191,19 @@ export function Editor({
   });
 
   return (
-    <>
-      <Overlay rects={highlight}>
-        {linkOpen && (
-          <LinkPopover href={linkHref} onApply={onLinkApply} onClose={onLinkClose} />
-        )}
-      </Overlay>
-      <div
-        ref={rootRef}
-        className="editor min-h-96 px-5 py-4 text-[15px]"
-        contentEditable
-        suppressContentEditableWarning
-        role="textbox"
-        aria-multiline="true"
-        spellCheck={false}
-        onClick={onClick}
-      >
-        {doc.blocks.map((block) => (
-          <BlockView key={block.id} block={block} />
-        ))}
-      </div>
-    </>
+    <div
+      ref={rootRef}
+      className="editor min-h-96 px-5 py-4 text-[15px]"
+      contentEditable
+      suppressContentEditableWarning
+      role="textbox"
+      aria-multiline="true"
+      spellCheck={false}
+      onClick={onClick}
+    >
+      {doc.blocks.map((block) => (
+        <BlockView key={block.id} block={block} />
+      ))}
+    </div>
   );
 }

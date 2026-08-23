@@ -1,4 +1,4 @@
-import type { Doc, Operations, Selection } from '../types';
+import type { Align, Doc, Operations, Selection } from '../types';
 import { caretAt, findBlock, withChildren } from '../doc';
 import { normalizeBlock } from '../normalize';
 import { blockLength, splitChildren } from '../text';
@@ -48,10 +48,32 @@ export function setBlockType(
           id: block.id,
           type: 'heading' as const,
           level: operation.level,
+          ...(block.align && { align: block.align }),
           children: block.children,
         }
-      : { id: block.id, type: 'paragraph' as const, children: block.children };
+      : {
+          id: block.id,
+          type: 'paragraph' as const,
+          ...(block.align && { align: block.align }),
+          children: block.children,
+        };
   });
 
   return { doc: { blocks }, selection };
+}
+
+// Alignment is a block attribute, not a mark — it can't apply to part of a line.
+export function setAlign(doc: Doc, selection: Selection, align: Align): OperationResult {
+  const { start, end } = orderSelection(doc, selection);
+  const from = blockIndex(doc, start.blockId);
+  const to = blockIndex(doc, end.blockId);
+
+  return {
+    doc: {
+      blocks: doc.blocks.map((block, index) =>
+        index < from || index > to ? block : { ...block, align },
+      ),
+    },
+    selection,
+  };
 }

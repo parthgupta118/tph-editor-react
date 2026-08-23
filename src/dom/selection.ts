@@ -16,17 +16,29 @@ export function readFromDom(root: HTMLElement, doc: Doc): Selection | null {
   return clampSelection(doc, { anchor, focus });
 }
 
-export function writeToDom(root: HTMLElement, selection: Selection): void {
+export function selectionRects(selection: Selection): DOMRect[] {
+  const root = document.querySelector<HTMLElement>(`[${BLOCK_ID_ATTR}]`)?.closest('.editor');
+  if (!(root instanceof HTMLElement)) return [];
+
+  const range = toDomRange(root, selection);
+  return range ? Array.from(range.getClientRects()) : [];
+}
+
+export function toDomRange(root: HTMLElement, selection: Selection): Range | null {
   const anchor = toDomPoint(root, selection.anchor);
   const focus = toDomPoint(root, selection.focus);
-  if (!anchor || !focus) return;
-
-  const domSelection = window.getSelection();
-  if (!domSelection) return;
+  if (!anchor || !focus) return null;
 
   const range = document.createRange();
   range.setStart(anchor.node, anchor.offset);
   range.setEnd(focus.node, focus.offset);
+  return range;
+}
+
+export function writeToDom(root: HTMLElement, selection: Selection): void {
+  const range = toDomRange(root, selection);
+  const domSelection = window.getSelection();
+  if (!range || !domSelection) return;
 
   domSelection.removeAllRanges();
   domSelection.addRange(range);

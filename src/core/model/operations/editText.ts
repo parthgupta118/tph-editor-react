@@ -1,8 +1,8 @@
-import type { Doc, Marks, Selection } from '../types';
+import type { DeleteUnit, Doc, Marks, Selection } from '../types';
 import { caretAt, findBlock, swapBlock, withChildren } from '../doc';
 import { marksAt } from '../marks';
 import { normalizeBlock } from '../normalize';
-import { blockLength, splitChildren } from '../text';
+import { blockLength, blockText, splitChildren, wordEndAfter, wordStartBefore } from '../text';
 import { blockIndex, isCollapsed, orderSelection } from '../../selection/position';
 
 export type OperationResult = { doc: Doc; selection: Selection };
@@ -57,31 +57,48 @@ export function deleteRange(doc: Doc, selection: Selection): OperationResult {
   };
 }
 
-export function deleteBackward(doc: Doc, selection: Selection): OperationResult {
-  if (!isCollapsed(selection)) return deleteRange(doc, selection);
-
-  const at = selection.anchor;
-  if (at.offset > 0) {
-    return deleteRange(doc, {
-      anchor: { blockId: at.blockId, offset: at.offset - 1 },
-      focus: at,
-    });
-  }
-  return mergeWithPrevious(doc, selection);
-}
-
-export function deleteForward(doc: Doc, selection: Selection): OperationResult {
+export function deleteBackward(
+  doc: Doc,
+  selection: Selection,
+  unit: DeleteUnit = 'char',
+): OperationResult {
   if (!isCollapsed(selection)) return deleteRange(doc, selection);
 
   const at = selection.anchor;
   const block = findBlock(doc, at.blockId);
   if (!block) return { doc, selection };
 
-  if (at.offset < blockLength(block)) {
-    return deleteRange(doc, {
-      anchor: at,
-      focus: { blockId: at.blockId, offset: at.offset + 1 },
-    });
+  // At the very start there is nothing left in this block to remove, whatever the
+  // unit — fold into the block above instead.
+  if (at.offset === 0) return mergeWithPrevious(doc, selection);
+
+  const target =
+    unit === 'line' ? 0
+    : unit === 'word' ? wordStartBefore(blockText(block), at.offset)
+    : at.offset - 1;
+
+  return deleteRange(doc, { anchor: { blockId: at.blockId, offset: target }, focus: at });
+}
+
+export function deleteForward(
+  doc: Doc,
+  selection: Selection,
+  unit: DeleteUnit = 'char',
+): OperationResult {
+  if (!isCollapsed(selection)) return deleteRange(doc, selection);
+
+  const at = selection.anchor;
+  const block = findBlock(doc, at.blockId);
+  if (!block) return { doc, selection };
+
+  const end = blockLength(block);
+  if (at.offset < end) {
+    const target =
+      unit === 'line' ? end
+      : unit === 'word' ? wordEndAfter(blockText(block), at.offset)
+      : at.offset + 1;
+
+    return deleteRange(doc, { anchor: at, focus: { blockId: at.blockId, offset: target } });
   }
 
   // At the end of a block, pull the next one up.
