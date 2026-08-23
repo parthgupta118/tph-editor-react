@@ -1,4 +1,5 @@
-import type { Marks, ToggleableMark } from './types';
+import type { Block, Marks, ToggleableMark } from './types';
+import { resolve } from './text';
 
 export function marksEqual(a: Marks, b: Marks): boolean {
   return a.bold === b.bold && a.italic === b.italic && a.link === b.link;
@@ -27,4 +28,10 @@ export function withoutLink(marks: Marks): Marks {
 
 export function hasMark(marks: Marks, mark: ToggleableMark): boolean {
   return marks[mark] === true;
+}
+
+// At offset 0 there is nothing before, so it picks up the character after.
+export function marksAt(block: Block, offset: number): Marks {
+  const { index } = resolve(block, offset);
+  return block.children[index]?.marks ?? {};
 }
