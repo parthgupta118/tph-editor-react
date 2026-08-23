@@ -46,14 +46,9 @@ export function writeToDom(root: HTMLElement, selection: Selection): void {
 
 // This code is to nudge the scroller ourselves when we reach end of container.
 export function scrollCaretIntoView(root: HTMLElement, selection: Selection): void {
-  const rect = toDomRange(root, selection)?.getBoundingClientRect();
-  if (!rect) return;
-
-  const view = root.getBoundingClientRect();
-  const margin = 12;
-
-  if (rect.bottom > view.bottom - margin) root.scrollTop += rect.bottom - view.bottom + margin;
-  else if (rect.top < view.top + margin) root.scrollTop -= view.top - rect.top + margin;
+  root
+    .querySelector<HTMLElement>(`[${BLOCK_ID_ATTR}="${CSS.escape(selection.focus.blockId)}"]`)
+    ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 export function domMatchesSelection(root: HTMLElement, selection: Selection | null): boolean {

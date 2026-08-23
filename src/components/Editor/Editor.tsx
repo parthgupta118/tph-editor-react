@@ -37,6 +37,8 @@ export function Editor({
 }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const writingCaret = useRef(false);
+  // Where we last scrolled to, so an unrelated re-render doesn't move the view.
+  const scrolledTo = useRef('');
 
   const onBeforeInput = useCallback(
     (input: InputEvent) => {
@@ -184,12 +186,17 @@ export function Editor({
     const root = rootRef.current;
     if (!root || !selection) return;
     if (!root.contains(document.activeElement)) return;
-    if (domMatchesSelection(root, selection)) return;
+    if (!domMatchesSelection(root, selection)) {
+      writingCaret.current = true;
+      writeToDom(root, selection);
+      writingCaret.current = false;
+    }
 
-    writingCaret.current = true;
-    writeToDom(root, selection);
-    scrollCaretIntoView(root, selection);
-    writingCaret.current = false;
+    const caret = `${selection.focus.blockId}:${selection.focus.offset}`;
+    if (caret !== scrolledTo.current) {
+      scrolledTo.current = caret;
+      scrollCaretIntoView(root, selection);
+    }
   });
 
   return (

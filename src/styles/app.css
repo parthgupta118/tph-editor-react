@@ -56,7 +56,12 @@
   body {
     background: var(--color-canvas);
     color: var(--color-ink);
-    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 }
@@ -70,6 +75,10 @@
     white-space: pre-wrap;
     outline: none;
     caret-color: var(--color-accent);
+    /* Reserve the scrollbar's width permanently, so text doesn't reflow sideways
+       the moment content starts overflowing. */
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
   }
 
   /* Spacing follows document editors: paragraphs sit close together, headings get
