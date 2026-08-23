@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Block, Doc, InlineNode } from '../model/types';
+import { at, para, run } from '../test-builders';
+import type { Doc } from '../model/types';
 import {
   clampPosition,
   clampSelection,
@@ -10,16 +11,9 @@ import {
   positionsEqual,
 } from './position';
 
-const run = (text: string): InlineNode => ({ kind: 'text', text, marks: {} });
-const para = (id: string, text: string): Block => ({
-  id,
-  type: 'paragraph',
-  children: [run(text)],
-});
 
-const doc: Doc = { blocks: [para('b1', 'Hello'), para('b2', 'world!')] };
+const doc: Doc = { blocks: [para('b1', run('Hello')), para('b2', run('world!'))] };
 
-const at = (blockId: string, offset: number) => ({ blockId, offset });
 
 describe('comparePositions', () => {
   it('orders by offset inside one block', () => {

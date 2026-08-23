@@ -1,20 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { Block, Doc, InlineNode, Marks } from './types';
+import { para, run } from '../test-builders';
+import type { Doc } from './types';
 import { DOC_VERSION, fromJSON, toJSON } from './serialize';
 import { normalizeDoc } from './normalize';
 import { withoutMark } from './marks';
 
-const run = (text: string, marks: Marks = {}): InlineNode => ({
-  kind: 'text',
-  text,
-  marks,
-});
 
-const para = (id: string, ...children: InlineNode[]): Block => ({
-  id,
-  type: 'paragraph',
-  children,
-});
 
 const doc: Doc = {
   blocks: [

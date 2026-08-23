@@ -1,21 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { Block, InlineNode, Marks } from './types';
+import { para, run } from '../test-builders';
 import { blockLength, blockText, clampOffset, resolve } from './text';
 
-const run = (text: string, marks: Marks = {}): InlineNode => ({
-  kind: 'text',
-  text,
-  marks,
-});
 
-const para = (...children: InlineNode[]): Block => ({
-  id: 'b1',
-  type: 'paragraph',
-  children,
-});
 
 // "Hello world" — "Hello " plain, "world" bold. Boundary sits at offset 6.
-const block = para(run('Hello '), run('world', { bold: true }));
+const block = para('b1', run('Hello '), run('world', { bold: true }));
 
 describe('blockText / blockLength', () => {
   it('concatenates children, ignoring marks', () => {
@@ -24,7 +14,7 @@ describe('blockText / blockLength', () => {
   });
 
   it('handles an empty block', () => {
-    const empty = para(run(''));
+    const empty = para('b1', run(''));
     expect(blockText(empty)).toBe('');
     expect(blockLength(empty)).toBe(0);
   });
@@ -68,6 +58,6 @@ describe('resolve', () => {
   });
 
   it('resolves offset 0 in an empty block', () => {
-    expect(resolve(para(run('')), 0)).toEqual({ index: 0, inner: 0 });
+    expect(resolve(para('b1', run('')), 0)).toEqual({ index: 0, inner: 0 });
   });
 });

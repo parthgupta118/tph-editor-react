@@ -1,24 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { Block, Doc, InlineNode, Marks } from '../types';
+import { caret, para, range, run } from '../../test-builders';
+import type { Doc } from '../types';
 import { blockText } from '../text';
 import { deleteRange, insertText } from './editText';
 
-const run = (text: string, marks: Marks = {}): InlineNode => ({ kind: 'text', text, marks });
-const para = (id: string, ...children: InlineNode[]): Block => ({
-  id,
-  type: 'paragraph',
-  children,
-});
 
-const at = (blockId: string, offset: number) => ({ blockId, offset });
-const caret = (blockId: string, offset: number) => ({
-  anchor: at(blockId, offset),
-  focus: at(blockId, offset),
-});
-const range = (a: [string, number], b: [string, number]) => ({
-  anchor: at(a[0], a[1]),
-  focus: at(b[0], b[1]),
-});
 
 // "Hello world", bold from offset 6.
 const oneBlock: Doc = { blocks: [para('b1', run('Hello '), run('world', { bold: true }))] };
