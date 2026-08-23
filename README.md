@@ -3,7 +3,7 @@
 A rich-text editor where the document model is the single source of truth and the
 DOM is only a projection of it.
 
-**Live:** _add deployment URL_
+**Live:** [TPH Text Editor](https://tph-editor-react.vercel.app/)
 
 ```bash
 pnpm install
