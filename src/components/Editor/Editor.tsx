@@ -1,9 +1,16 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Doc, Operations, Selection } from '../../core/model/types';
 import { linkRangeAt } from '../../core/model/queries';
-import { domMatchesSelection, readFromDom, writeToDom } from '../../dom/selection';
+import {
+  domMatchesSelection,
+  readFromDom,
+  toDomRange,
+  writeToDom,
+} from '../../dom/selection';
 import { BlockView } from './BlockView';
 import { insertPlainText } from './paste';
+import { LinkPopover } from '../Toolbar/LinkPopover';
+import { Overlay } from '../Toolbar/Overlay';
 
 type Props = {
   doc: Doc;
@@ -11,6 +18,10 @@ type Props = {
   run: (operation: Operations) => void;
   setSelection: (selection: Selection | null) => void;
   onLinkClick: (selection: Selection) => void;
+  linkOpen: boolean;
+  linkHref: string;
+  onLinkApply: (href: string) => void;
+  onLinkClose: () => void;
   undo: () => void;
   redo: () => void;
 };
@@ -21,18 +32,18 @@ export function Editor({
   run,
   setSelection,
   onLinkClick,
+  linkOpen,
+  linkHref,
+  onLinkApply,
+  onLinkClose,
   undo,
   redo,
 }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
-  // Set while we write the caret ourselves, so the selectionchange it triggers
-  // doesn't come straight back in as user input.
   const writingCaret = useRef(false);
 
   const onBeforeInput = useCallback(
     (input: InputEvent) => {
-      // Nothing gets through. An unhandled input type that slipped past would let
-      // the DOM drift from the model, and every offset after that is wrong.
       input.preventDefault();
 
       switch (input.inputType) {
@@ -141,12 +152,20 @@ export function Editor({
     [doc, setSelection, onLinkClick],
   );
 
+  // The browser stops painting the selection once focus moves to the link popover,
+  // we have to so paint it ourselves while that's open.
+  const [highlight, setHighlight] = useState<DOMRect[]>([]);
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const range = linkOpen && root && selection ? toDomRange(root, selection) : null;
+    setHighlight(range ? Array.from(range.getClientRects()) : []);
+  }, [linkOpen, selection, doc]);
+
   // Re-rendering replaces text nodes, which destroys the caret. Put it back before
   // the browser paints, or it visibly jumps for a frame on every keystroke.
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root || !selection) return;
-    // Don't yank focus back while the user is in the link popover.
     if (!root.contains(document.activeElement)) return;
     if (domMatchesSelection(root, selection)) return;
 
@@ -156,19 +175,26 @@ export function Editor({
   });
 
   return (
-    <div
-      ref={rootRef}
-      className="editor min-h-96 px-5 py-4 text-[15px]"
-      contentEditable
-      suppressContentEditableWarning
-      role="textbox"
-      aria-multiline="true"
-      spellCheck={false}
-      onClick={onClick}
-    >
-      {doc.blocks.map((block) => (
-        <BlockView key={block.id} block={block} />
-      ))}
-    </div>
+    <>
+      <Overlay rects={highlight}>
+        {linkOpen && (
+          <LinkPopover href={linkHref} onApply={onLinkApply} onClose={onLinkClose} />
+        )}
+      </Overlay>
+      <div
+        ref={rootRef}
+        className="editor min-h-96 px-5 py-4 text-[15px]"
+        contentEditable
+        suppressContentEditableWarning
+        role="textbox"
+        aria-multiline="true"
+        spellCheck={false}
+        onClick={onClick}
+      >
+        {doc.blocks.map((block) => (
+          <BlockView key={block.id} block={block} />
+        ))}
+      </div>
+    </>
   );
 }
