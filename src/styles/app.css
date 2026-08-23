@@ -1,0 +1,98 @@
+@import 'tailwindcss';
+
+/* Design tokens. Everything reads from here rather than from ad-hoc values. */
+@theme {
+  --color-canvas: oklch(98.6% 0.002 265);
+  --color-surface: oklch(100% 0 0);
+  --color-ink: oklch(23% 0.02 265);
+  --color-muted: oklch(56% 0.02 265);
+  --color-line: oklch(92.5% 0.005 265);
+  --color-accent: oklch(56% 0.19 265);
+  --color-accent-soft: oklch(95% 0.03 265);
+
+  --radius-control: 0.5rem;
+  --ease-out: cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+@layer base {
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* The editable surface renders from the model, so these elements can't carry
+   utility classes. */
+@layer components {
+  .editor {
+    /* Correctness, not styling. HTML collapses runs of spaces, which would make
+       the DOM text shorter than the model text and every mapped offset wrong. */
+    white-space: pre-wrap;
+    outline: none;
+    caret-color: var(--color-accent);
+  }
+
+  /* Removing the outline without replacing it leaves keyboard users with no way to
+     tell the editor has focus. */
+  .editor:focus-visible {
+    box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--color-accent) 35%, transparent);
+  }
+
+  .editor > * + * {
+    margin-top: 0.75rem;
+  }
+
+  .editor h1 {
+    font-size: 1.75rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .editor h2 {
+    font-size: 1.375rem;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    line-height: 1.25;
+  }
+
+  .editor h3 {
+    font-size: 1.125rem;
+    font-weight: 650;
+    line-height: 1.35;
+  }
+
+  .editor p {
+    line-height: 1.7;
+  }
+
+  .editor a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    /* Clicking selects the whole link and opens the popover, so it behaves like a
+       link even though it sits inside editable text. */
+    cursor: pointer;
+  }
+
+  .editor a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .editor ::selection {
+    background: color-mix(in oklch, var(--color-accent) 20%, transparent);
+  }
+}
+
+/* Nothing inside the editable surface animates — transitions there cause layout
+   thrash and can interfere with caret painting. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+}
