@@ -2,6 +2,7 @@ import type { Doc, Marks, Selection, ToggleableMark } from '../types';
 import { findBlock, withChildren } from '../doc';
 import { hasMark, marksAt, withLink, withMark, withoutLink, withoutMark } from '../marks';
 import { normalizeBlock } from '../normalize';
+import { safeHref } from '../href';
 import { sliceChildren } from '../text';
 import { eachBlockInRange, rangeHasMark } from '../queries';
 import { isCollapsed } from '../../selection/position';
@@ -25,8 +26,12 @@ export function toggleMark(
 export function setLink(doc: Doc, selection: Selection, href: string | null): OperationResult {
   if (isCollapsed(selection)) return { doc, selection };
 
+  // Sanitised here rather than at the UI, so nothing unsafe can reach the model
+  // whatever the caller does. Rejected input removes the link.
+  const safe = href === null ? null : safeHref(href);
+
   const doc2 = mapRange(doc, selection, (marks) =>
-    href === null ? withoutLink(marks) : withLink(marks, href),
+    safe === null ? withoutLink(marks) : withLink(marks, safe),
   );
   return { doc: doc2, selection };
 }

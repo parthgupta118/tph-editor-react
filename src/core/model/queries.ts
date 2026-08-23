@@ -1,6 +1,6 @@
-import type { Block, Doc, InlineNode, Marks, Selection, ToggleableMark } from './types';
+import type { Block, Doc, InlineNode, Marks, Position, Selection, ToggleableMark } from './types';
 import { hasMark } from './marks';
-import { blockLength, sliceChildren } from './text';
+import { blockLength, resolve, sliceChildren } from './text';
 import { blockIndex, orderSelection } from '../selection/position';
 
 export type CoveredBlock = { block: Block; from: number; to: number };
@@ -19,6 +19,40 @@ export function eachBlockInRange(doc: Doc, selection: Selection): CoveredBlock[]
     from: i === 0 ? start.offset : 0,
     to: first + i === last ? end.offset : blockLength(block),
   }));
+}
+
+// Clicking a link should act on the whole link, not the character under the caret.
+// Walks outward from the position across children sharing the same href.
+export function linkRangeAt(
+  doc: Doc,
+  position: Position,
+): { selection: Selection; href: string } | null {
+  const block = doc.blocks.find((candidate) => candidate.id === position.blockId);
+  if (!block) return null;
+
+  const { index } = resolve(block, position.offset);
+  const href = block.children[index]?.marks.link;
+  if (href === undefined) return null;
+
+  let first = index;
+  while (block.children[first - 1]?.marks.link === href) first -= 1;
+
+  let last = index;
+  while (block.children[last + 1]?.marks.link === href) last += 1;
+
+  let start = 0;
+  for (let i = 0; i < first; i++) start += block.children[i]?.text.length ?? 0;
+
+  let end = start;
+  for (let i = first; i <= last; i++) end += block.children[i]?.text.length ?? 0;
+
+  return {
+    href,
+    selection: {
+      anchor: { blockId: block.id, offset: start },
+      focus: { blockId: block.id, offset: end },
+    },
+  };
 }
 
 export function childrenInRange(doc: Doc, selection: Selection): InlineNode[] {
