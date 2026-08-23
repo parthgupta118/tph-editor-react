@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import type { Doc, Operations, Selection, ToggleableMark } from '../../core/model/types';
 import { linkRangeAt } from '../../core/model/queries';
-import { domMatchesSelection, readFromDom, writeToDom } from '../../dom/selection';
+import {
+  domMatchesSelection,
+  readFromDom,
+  scrollCaretIntoView,
+  writeToDom,
+} from '../../dom/selection';
 import BlockView from './BlockView';
 import { insertPlainText } from './paste';
 
@@ -183,13 +188,14 @@ export function Editor({
 
     writingCaret.current = true;
     writeToDom(root, selection);
+    scrollCaretIntoView(root, selection);
     writingCaret.current = false;
   });
 
   return (
     <div
       ref={rootRef}
-      className="editor min-h-96 px-5 py-4 text-[15px]"
+      className="editor h-120 overflow-y-auto overscroll-contain px-5 py-4 text-[15px]"
       contentEditable
       suppressContentEditableWarning
       role="textbox"

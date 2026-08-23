@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { Doc, Selection } from '../../core/model/types';
 import { selectionRects } from '../../dom/selection';
@@ -16,14 +16,19 @@ type Props = {
 // and the block spacing rule would shift the content. Positions itself against the
 // selection, so it follows the text rather than the toolbar.
 export default function LinkEditor({ doc, selection, href, onApply, onClose }: Props) {
-  // Derived from the selection, so computed during render rather than stored.
-  // `doc` is a real dependency even though it isn't referenced: selectionRects
-  // measures the DOM, and the DOM changes when the document does.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const rects = useMemo(
-    () => (selection ? selectionRects(selection) : []),
-    [selection, doc],
-  );
+  const rects = useMemo(() => {
+    // Geometry depends on the rendered document, so `doc` is a real dependency
+    // even though selectionRects reads it from the DOM rather than from here.
+    void doc;
+    return selection ? selectionRects(selection) : [];
+  }, [selection, doc]);
+
+  // Positions are measured once against the viewport, so scrolling would leave the
+  // popover floating away from its text. We Dismiss it instead of chasing it.
+  useEffect(() => {
+    window.addEventListener('scroll', onClose, true);
+    return () => window.removeEventListener('scroll', onClose, true);
+  }, [onClose]);
 
   const anchor = rects[0];
   if (!anchor) return null;

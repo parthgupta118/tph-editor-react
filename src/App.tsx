@@ -62,15 +62,13 @@ export default function App() {
       : ('paragraph' as const);
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-6xl flex-col gap-6 px-5 py-8">
+    <main className="mx-auto flex min-h-dvh max-w-6xl flex-col gap-4 px-3 py-5 sm:gap-6 sm:px-5 sm:py-8">
       <header>
         <h1 className="text-xl font-semibold tracking-tight">Rich-text editor core</h1>
-        <p className="mt-1 text-sm text-muted">
-          React · TypeScript strict · the model is the single source of truth
-        </p>
+        <p className="mt-1 text-sm text-muted">React · TypeScript strict</p>
       </header>
 
-      <div className="grid flex-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid flex-1 items-start gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_clamp(18rem,26vw,22rem)]">
         <section className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm transition-shadow duration-200 ease-[--ease-smooth] focus-within:ring-2 focus-within:ring-accent/25">
           <Toolbar
             activeMarks={editor.activeMarks}
