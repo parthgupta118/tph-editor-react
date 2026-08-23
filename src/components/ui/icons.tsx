@@ -33,3 +33,24 @@ export function AlignIcon({ align }: { align: Align }) {
     </svg>
   );
 }
+
+// Arrow curving back over a horizontal run — the conventional undo shape. Mirrored
+// for redo rather than duplicated.
+function HistoryIcon({ flip }: { flip?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="15"
+      height="15"
+      {...stroke}
+      strokeLinejoin="round"
+      style={flip ? { transform: 'scaleX(-1)' } : undefined}
+    >
+      <path d="M4 9h11a5 5 0 0 1 0 10h-6" />
+      <path d="M8 5 4 9l4 4" />
+    </svg>
+  );
+}
+
+export const UndoIcon = () => <HistoryIcon />;
+export const RedoIcon = () => <HistoryIcon flip />;

@@ -9,7 +9,7 @@ import type {
 import { isCollapsed } from '../../core/selection/position';
 import Button from '../ui/Button';
 import Divider from '../ui/Divider';
-import { AlignIcon, LinkIcon } from '../ui/icons';
+import { AlignIcon, LinkIcon, RedoIcon, UndoIcon } from '../ui/icons';
 
 type Props = {
   activeMarks: Marks;
@@ -120,10 +120,10 @@ export function Toolbar({
       <Divider />
 
       <Button label="Undo" disabled={!canUndo} onClick={undo}>
-        ↶
+        <UndoIcon />
       </Button>
       <Button label="Redo" disabled={!canRedo} onClick={redo}>
-        ↷
+        <RedoIcon />
       </Button>
     </div>
   );

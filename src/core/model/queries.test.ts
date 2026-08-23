@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { caret, docOf, para, range, run } from '../test-builders';
-import { childrenInRange, marksInRange, rangeHasMark } from './queries';
+import { at, caret, docOf, para, range, run } from '../test-builders';
+import { childrenInRange, linkRangeAt, marksInRange, rangeHasMark } from './queries';
 
 // "Hello world", bold from offset 6.
 const doc = docOf(para('b1', run('Hello '), run('world', { bold: true })));
@@ -64,5 +64,37 @@ describe('marksInRange', () => {
 
   it('is empty for a caret', () => {
     expect(marksInRange(doc, caret('b1', 8))).toEqual({});
+  });
+});
+
+describe('linkRangeAt', () => {
+  const link = 'https://a.com';
+
+  it('expands to cover the whole link, not the character clicked', () => {
+    const doc = docOf(para('b1', run('go '), run('to the site', { link })));
+    expect(linkRangeAt(doc, at('b1', 7))).toEqual({
+      href: link,
+      selection: range(['b1', 3], ['b1', 14]),
+    });
+  });
+
+  it('merges children that share an href', () => {
+    const doc = docOf(para('b1', run('ab', { link }), run('cd', { link, bold: true })));
+    expect(linkRangeAt(doc, at('b1', 1))?.selection).toEqual(range(['b1', 0], ['b1', 4]));
+  });
+
+  it('stops at a different href', () => {
+    const doc = docOf(
+      para('b1', run('ab', { link }), run('cd', { link: 'https://b.com' })),
+    );
+    expect(linkRangeAt(doc, at('b1', 1))?.selection).toEqual(range(['b1', 0], ['b1', 2]));
+  });
+
+  it('returns null when the position is not in a link', () => {
+    expect(linkRangeAt(docOf(para('b1', run('plain'))), at('b1', 2))).toBeNull();
+  });
+
+  it('returns null for a block that does not exist', () => {
+    expect(linkRangeAt(docOf(para('b1', run('x', { link }))), at('gone', 0))).toBeNull();
   });
 });

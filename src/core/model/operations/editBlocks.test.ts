@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { caret, docOf, head, para, range, run } from '../../test-builders';
 import { blockText } from '../text';
-import { setBlockType, splitBlock } from './editBlocks';
+import { setAlign, setBlockType, splitBlock } from './editBlocks';
 import { deleteBackward, deleteForward, mergeWithPrevious } from './editText';
 
 const oneLine = docOf(para('b1', run('Hello world')));
@@ -151,5 +151,72 @@ describe('setBlockType', () => {
       level: 1,
     });
     expect(out.doc.blocks[1]!.type).toBe('paragraph');
+  });
+});
+
+describe('setAlign', () => {
+  const doc = docOf(para('b1', run('one')), para('b2', run('two')));
+
+  it('aligns the block the caret is in', () => {
+    const out = setAlign(doc, caret('b1', 0), 'center');
+    expect(out.doc.blocks[0]!.align).toBe('center');
+    expect(out.doc.blocks[1]!.align).toBeUndefined();
+  });
+
+  it('aligns every block the selection touches', () => {
+    const out = setAlign(doc, range(['b1', 1], ['b2', 1]), 'right');
+    expect(out.doc.blocks.every((block) => block.align === 'right')).toBe(true);
+  });
+
+  it('leaves children untouched', () => {
+    const marked = docOf(para('b1', run('one', { bold: true })));
+    const out = setAlign(marked, caret('b1', 0), 'center');
+    expect(out.doc.blocks[0]!.children).toEqual([run('one', { bold: true })]);
+  });
+
+  it('survives a block type change', () => {
+    const centred = setAlign(doc, caret('b1', 0), 'center');
+    const out = setBlockType(centred.doc, caret('b1', 0), {
+      type: 'setBlockType',
+      blockType: 'heading',
+      level: 2,
+    });
+    expect(out.doc.blocks[0]).toMatchObject({ type: 'heading', align: 'center' });
+  });
+});
+
+describe('delete units', () => {
+  const doc = docOf(para('b1', run('the quick brown fox')));
+
+  it('deletes a word backwards', () => {
+    const out = deleteBackward(doc, caret('b1', 19), 'word');
+    expect(blockText(out.doc.blocks[0]!)).toBe('the quick brown ');
+  });
+
+  it('skips trailing spaces before deleting the word', () => {
+    const out = deleteBackward(doc, caret('b1', 16), 'word');
+    expect(blockText(out.doc.blocks[0]!)).toBe('the quick fox');
+  });
+
+  it('deletes to the start of the block', () => {
+    const out = deleteBackward(doc, caret('b1', 9), 'line');
+    expect(blockText(out.doc.blocks[0]!)).toBe(' brown fox');
+  });
+
+  it('deletes a word forwards', () => {
+    const out = deleteForward(doc, caret('b1', 0), 'word');
+    expect(blockText(out.doc.blocks[0]!)).toBe(' quick brown fox');
+  });
+
+  it('deletes to the end of the block', () => {
+    const out = deleteForward(doc, caret('b1', 9), 'line');
+    expect(blockText(out.doc.blocks[0]!)).toBe('the quick');
+  });
+
+  it('still merges blocks at offset 0 whatever the unit', () => {
+    const two = docOf(para('b1', run('one')), para('b2', run('two')));
+    const out = deleteBackward(two, caret('b2', 0), 'word');
+    expect(out.doc.blocks).toHaveLength(1);
+    expect(blockText(out.doc.blocks[0]!)).toBe('onetwo');
   });
 });

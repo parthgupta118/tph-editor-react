@@ -40,7 +40,7 @@ export default function LinkEditor({ doc, selection, href, onApply, onClose }: P
         <span
           key={i}
           aria-hidden
-          className="animate-highlight-in pointer-events-none fixed z-40 rounded-[2px] bg-accent/25"
+          className="animate-highlight-in pointer-events-none fixed z-40 rounded-sm bg-accent/25"
           style={{
             top: rect.top,
             left: rect.left,
