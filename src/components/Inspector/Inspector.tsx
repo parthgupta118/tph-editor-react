@@ -1,6 +1,6 @@
 import type { Doc, Selection } from '../../core/model/types';
 import { toJSON } from '../../core/model/serialize';
-import { Switch } from '../ui/Switch';
+import Switch from '../ui/Switch';
 
 type Props = {
   doc: Doc;

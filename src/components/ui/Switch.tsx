@@ -4,7 +4,7 @@ type Props = {
   label: string;
 };
 
-export function Switch({ checked, onChange, label }: Props) {
+export default function Switch({ checked, onChange, label }: Props) {
   return (
     <button
       type="button"

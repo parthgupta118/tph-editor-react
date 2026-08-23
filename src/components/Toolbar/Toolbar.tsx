@@ -7,7 +7,8 @@ import type {
   ToggleableMark,
 } from '../../core/model/types';
 import { isCollapsed } from '../../core/selection/position';
-import { Button, Divider } from '../ui/Button';
+import Button from '../ui/Button';
+import Divider from '../ui/Divider';
 import { AlignIcon, LinkIcon } from '../ui/icons';
 
 type Props = {

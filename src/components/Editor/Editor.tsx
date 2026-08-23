@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import type { Doc, Operations, Selection, ToggleableMark } from '../../core/model/types';
 import { linkRangeAt } from '../../core/model/queries';
-import {
-  domMatchesSelection,
-  readFromDom,
-  writeToDom,
-} from '../../dom/selection';
-import { BlockView } from './BlockView';
+import { domMatchesSelection, readFromDom, writeToDom } from '../../dom/selection';
+import BlockView from './BlockView';
 import { insertPlainText } from './paste';
 
 const SHORTCUT_MARKS: Record<string, ToggleableMark | undefined> = {

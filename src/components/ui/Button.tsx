@@ -6,7 +6,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function Button({
+export default function Button({
   label,
   active = false,
   disabled = false,
@@ -38,8 +38,4 @@ export function Button({
       {children}
     </button>
   );
-}
-
-export function Divider() {
-  return <span aria-hidden className="mx-1 h-5 w-px bg-line" />;
 }

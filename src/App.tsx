@@ -3,9 +3,9 @@ import type { Doc, HeadingLevel } from './core/model/types';
 import { useEditor } from './hooks/useEditor';
 import { Editor } from './components/Editor';
 import { Toolbar } from './components/Toolbar';
-import { Inspector } from './components/Inspector';
-import { LinkEditor } from './components/Toolbar/LinkEditor';
+import LinkEditor from './components/Toolbar/LinkEditor';
 import './styles/app.css';
+import { Inspector } from './components/Inspector';
 
 const text = (value: string, marks = {}) => ({
   kind: 'text' as const,

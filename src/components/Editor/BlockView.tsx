@@ -7,7 +7,7 @@ import { Inline } from './Inline';
 
 // Memoized by block reference. Operations only rebuild the blocks they touch, so
 // typing re-renders one block rather than the document.
-export const BlockView = memo(function BlockView({ block }: { block: Block }) {
+const BlockView = memo(function BlockView({ block }: { block: Block }) {
   // An empty block has no text node, so there'd be nowhere to put the caret and it
   // would collapse to zero height.
   const children =
@@ -34,3 +34,5 @@ export const BlockView = memo(function BlockView({ block }: { block: Block }) {
       return assertNever(block);
   }
 });
+
+export default BlockView;
