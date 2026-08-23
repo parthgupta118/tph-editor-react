@@ -1,5 +1,6 @@
 import type { Doc, Selection } from '../../core/model/types';
 import { toJSON } from '../../core/model/serialize';
+import { Switch } from '../ui/Switch';
 
 type Props = {
   doc: Doc;
@@ -21,19 +22,13 @@ function Section({ title, children }: { title: string; children: string }) {
   );
 }
 
-// The model is the source of truth and the DOM is a projection of it. Easier to
-// show than to claim, so this panel puts the model next to the editor.
 export function Inspector({ doc, selection, open, onToggle }: Props) {
   return (
     <aside className="rounded-xl border border-line bg-surface shadow-sm">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-ink transition-colors duration-140 hover:bg-canvas focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:outline-none"
-      >
-        Model
-        <span className="text-xs text-muted">{open ? 'hide' : 'show'}</span>
-      </button>
+      <div className="flex items-center justify-between px-3 py-2">
+        <span className="text-sm font-medium text-ink">Model</span>
+        <Switch checked={open} onChange={onToggle} label="Show the document model" />
+      </div>
 
       {open && (
         <div className="max-h-[70dvh] overflow-auto border-t border-line px-3 py-2">

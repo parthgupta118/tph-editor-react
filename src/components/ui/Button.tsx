@@ -22,8 +22,11 @@ export function Button({ label, active = false, disabled = false, onClick, child
         'inline-flex h-8 min-w-8 items-center justify-center rounded-[--radius-control] px-2',
         'text-sm transition-colors duration-[140ms] ease-[--ease-out]',
         'focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:outline-none',
-        'disabled:pointer-events-none disabled:opacity-35',
-        active ? 'bg-accent-soft text-accent' : 'text-ink hover:bg-canvas active:bg-line/60',
+        disabled
+          ? 'cursor-not-allowed text-muted/45 line-through decoration-1'
+          : active
+            ? 'bg-accent-soft text-accent'
+            : 'text-ink hover:bg-canvas active:bg-line/60',
       ].join(' ')}
     >
       {children}
