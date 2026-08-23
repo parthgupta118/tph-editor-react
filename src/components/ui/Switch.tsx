@@ -13,18 +13,18 @@ export function Switch({ checked, onChange, label }: Props) {
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={[
-        'relative inline-flex h-[18px] w-8 shrink-0 items-center rounded-full',
-        'transition-colors duration-[140ms] ease-[--ease-out]',
+        'relative inline-flex h-4.5 w-8 shrink-0 items-center rounded-full',
+        'transition-colors duration-200 ease-[--ease-smooth]',
         'focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:outline-none',
         checked ? 'bg-accent' : 'bg-line',
       ].join(' ')}
     >
       <span
         className={[
-          'absolute size-[14px] rounded-full bg-surface shadow-sm',
+          'absolute size-3.5 rounded-full bg-surface shadow-sm',
           // transform only — animating `left` would relayout every frame
-          'transition-transform duration-[140ms] ease-[--ease-out]',
-          checked ? 'translate-x-[16px]' : 'translate-x-[2px]',
+          'transition-transform duration-200 ease-[--ease-smooth]',
+          checked ? 'translate-x-4' : 'translate-x-0.5',
         ].join(' ')}
       />
     </button>

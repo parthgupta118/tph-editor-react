@@ -1,6 +1,5 @@
 import type { HeadingLevel, Marks, Operations, Selection } from '../../core/model/types';
 import { isCollapsed } from '../../core/selection/position';
-import { LinkPopover } from './LinkPopover';
 import { Button, Divider } from '../ui/Button';
 
 type Props = {
@@ -63,7 +62,10 @@ export function Toolbar({
         disabled={!hasRange}
         onClick={() => onLinkOpenChange(!linkOpen)}
       >
-        <span className="text-[13px]">🔗</span>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1" strokeLinecap="round" />
+          <path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" strokeLinecap="round" />
+        </svg>
       </Button>
 
       <Divider />
@@ -99,16 +101,6 @@ export function Toolbar({
         ↷
       </Button>
 
-      {linkOpen && (
-        <LinkPopover
-          href={activeMarks.link ?? ''}
-          onApply={(href) => {
-            run({ type: 'setLink', href: href === '' ? null : href });
-            onLinkOpenChange(false);
-          }}
-          onClose={() => onLinkOpenChange(false)}
-        />
-      )}
     </div>
   );
 }

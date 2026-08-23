@@ -13,14 +13,11 @@ export function LinkPopover({ href, onApply, onClose }: Props) {
 
   useEffect(() => inputRef.current?.focus(), []);
 
-  // This input takes focus, so the DOM caret leaves the editor. The model keeps the
-  // last selection it saw (see the selectionchange handler in Editor), which is what
-  // the link gets applied to.
   return (
     <div
       role="dialog"
       aria-label="Link"
-      className="absolute top-full left-2 z-10 mt-1.5 flex items-center gap-1 rounded-[--radius-control] border border-line bg-surface p-1.5 shadow-lg"
+      className="flex items-center gap-1 rounded-[--radius-control] border border-line bg-surface p-1.5 shadow-lg"
     >
       <input
         ref={inputRef}
